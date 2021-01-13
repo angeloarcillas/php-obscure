@@ -29,8 +29,12 @@ if (!function_exists("assets")) {
  * Redirect to new Page
  */
 if (!function_exists('redirect')) {
-    function redirect(string $to, int $status = 302, array $headers = [])
+    function redirect(?string $to = null, int $status = 302, array $headers = [])
     {
+        if (!$to) {
+            return new \Core\Http\Router();
+        }
+
         // loop headers
         foreach ($headers as $header) {
             header($header);
@@ -51,19 +55,13 @@ if (!function_exists("request")) {
     function request(?string $key = null)
     {
         // retrieve $_REQUEST
-        $request = \Core\Http\Request::request();
-
+        $request = (new \Core\Http\Request())->request();
         if (!$key) {
-            return (object) $request;
+            return $request;
         }
-        // return all request as object
+        // return Request instance
 
-        if (array_key_exists($key, $request)) {
-            return $request[$key];
-        }
-        // return request
-
-        error("Request key doesnt exist");
+        return $request->$key;
     }
 }
 
@@ -129,7 +127,7 @@ if (!function_exists("dd")) {
  *
  * @return mixed
  */
-function session(string | array $x, bool $delete = false)
+function session(string | array | object $x, bool $delete = false)
 {
 
     // session($key, true) | delete session

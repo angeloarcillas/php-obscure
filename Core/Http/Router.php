@@ -7,10 +7,10 @@ class Router
 {
     private $host = "php-obscure"; // (OPTIONAL)
     private $controllerNamespace = "App\\Controllers\\";
-    private $validMethods = ['GET','POST'];
+    private $validMethods = ['GET', 'POST'];
     private $routes = [
         'GET' => [],
-        'POST' => []
+        'POST' => [],
     ];
     private $params = null;
 
@@ -41,9 +41,9 @@ class Router
      */
     public static function load(string $file): object
     {
-        $router = new static; // create object
+        $router = new static; // create instance
         require $file; // set routes
-        return $router; // return object
+        return $router; // return instace
     }
 
     /**
@@ -52,9 +52,9 @@ class Router
      * @param string $uri
      * @param $controller
      */
-    private function get(string $uri, $controller)
+    protected function get(string $uri, $controller)
     {
-        $uri = trim($this->host.$uri, '/');
+        $uri = trim($this->host . $uri, '/');
         $this->routes['GET'][$uri] = $controller;
     }
 
@@ -64,9 +64,9 @@ class Router
      * @param string $uri
      * @param string $controller
      */
-    private function post(string $uri, $controller)
+    protected function post(string $uri, $controller)
     {
-        $uri = trim($this->host.$uri, '/');
+        $uri = trim($this->host . $uri, '/');
         $this->routes['POST'][$uri] = $controller;
     }
 
@@ -128,13 +128,12 @@ class Router
         throw new Exception("No routes defined for this url");
     }
 
-
     /**
      * Validate if request method is valid
      * @param string $method
      * @return bool
      */
-    private function isValidMethod(string $method): bool
+    protected function isValidMethod(string $method): bool
     {
         return in_array($method, $this->validMethods, true);
     }
@@ -145,13 +144,13 @@ class Router
      * @param string $controller
      * @param string $action
      */
-    private function callAction(string $controller, string $action)
+    protected function callAction(string $controller, string $action)
     {
         // set class namspace
         $class = $this->controllerNamespace . $controller;
 
         // check if class exist
-        if (! class_exists($class)) {
+        if (!class_exists($class)) {
             throw new Exception("No Class defined for this Controller.");
         }
 
@@ -159,11 +158,21 @@ class Router
         $object = new $class;
 
         // check if method exist
-        if (! method_exists($object, $action)) {
+        if (!method_exists($object, $action)) {
             throw new Exception("No Method defined for this Class.");
         }
 
         // call method from class
         return $object->$action($this->params);
+    }
+
+    // redirect()->back();
+    public function back()
+    {
+        if (isset($_SERVER['HTTP_REFERER'])) {
+            header("location: {$_SERVER['HTTP_REFERER']}", true, 302);
+        }
+
+        return null;
     }
 }

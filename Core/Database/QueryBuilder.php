@@ -11,8 +11,8 @@ class QueryBuilder extends Connection
      */
     public function __construct()
     {
-      ob_start();
-      // $this->conn = parent::connect($config);
+        ob_start();
+        // $this->conn = parent::connect($config);
     }
 
     /**
@@ -20,10 +20,9 @@ class QueryBuilder extends Connection
      */
     public function __destruct()
     {
-      // unset($this->conn);
-      ob_end_flush();
+        // unset($this->conn);
+        ob_end_flush();
     }
-
 
     /**
      * Query from database
@@ -34,7 +33,7 @@ class QueryBuilder extends Connection
      */
     public function query(string $sql, array $params = []): bool
     {
-      return $this->connection()->prepare($sql)->execute($params);
+        return $this->connection()->prepare($sql)->execute($params);
     }
 
     /**
@@ -44,11 +43,11 @@ class QueryBuilder extends Connection
      * @param array $params
      * @return bool|object
      */
-    public function select(string $sql, array $params = []): bool|object
+    public function select(string $sql, array $params = []): bool | object
     {
-      $stmt = $this->connection()->prepare($sql);
-      $stmt->execute($params);
-      return $stmt->fetch();
+        $stmt = $this->connection()->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetch();
     }
 
     /**
@@ -60,9 +59,9 @@ class QueryBuilder extends Connection
      */
     public function selectAll(string $sql, array $params = []): array
     {
-      $stmt = $this->connection()->prepare($sql);
-      $stmt->execute($params);
-      return $stmt->fetchAll();
+        $stmt = $this->connection()->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll();
     }
 
     /**
@@ -74,13 +73,13 @@ class QueryBuilder extends Connection
      */
     public function rowCount(string $sql, array $params = []): int
     {
-      $stmt = $this->connection()->prepare($sql);
-      $stmt->execute($params);
-      return $stmt->rowCount();
+        $stmt = $this->connection()->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->rowCount();
     }
 
     private function connection()
     {
-      return parent::connect(CONFIG['database']);
+        return parent::connect(CONFIG['database']);
     }
 }

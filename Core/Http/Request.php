@@ -1,18 +1,29 @@
 <?php
 namespace Core\Http;
 
-use Exception;
+use Core\Http\Traits\Validator;
 
 class Request
 {
+    use Validator;
+
+    protected $attributes;
+
+    public function __construct()
+    {
+        $this->attributes = array_map(function ($request) {
+            return strip_tags(htmlspecialchars($request));
+        }, $_REQUEST);
+    }
+
     /**
      * @return string Request url w/out ?(Query string)
      */
-    public static function uri(): string
+    public static function url(): string
     {
-      return reset(...[explode('?',
-        trim($_SERVER['REQUEST_URI'], '/')
-      )]);
+        return reset(...[explode('?',
+            trim($_SERVER['REQUEST_URI'], '/')
+        )]);
     }
 
     /**
@@ -20,20 +31,19 @@ class Request
      */
     public static function method(): string
     {
-      return $_SERVER['REQUEST_METHOD'];
+        return $_SERVER['REQUEST_METHOD'];
     }
 
     /**
      * @return string Request variables
      */
-    public static function request(): array
+    public function request(): object
     {
-      if (empty($_REQUEST))
-          throw new Exception("Empty request");
+        if (empty($_REQUEST)) {
+            throw new Exception("Error: Empty request");
+        }
 
-      return array_map(function ($request) {
-          return strip_tags(htmlspecialchars($request));
-      }, $_REQUEST);
+        return $this;
     }
 
     /**
@@ -41,12 +51,35 @@ class Request
      */
     public static function query(?string $key = null)
     {
-      if (!$key)
-          return $_GET;
+        if (!$key) {
+            return $_GET;
+        }
 
-      if (array_key_exists($key, $_GET))
-          return $_GET[$key];
+        if (array_key_exists($key, $_GET)) {
+            return $_GET[$key];
+        }
 
-      throw new Exception("Query {$key} doesnt exist");
+        throw new Exception("Query {$key} doesnt exist");
+    }
+
+    public function all()
+    {
+        return $this->attributes;
+    }
+
+    public function __get($key)
+    {
+        if (!$this->attributes[$key]) {
+            return null;
+        }
+
+        // throw new \Exception("Error: Request key doesnt exists.");
+
+        return $this->attributes[$key];
+    }
+
+    public function __set($key, $value)
+    {
+        $this->attributes[$key] = $value;
     }
 }

@@ -16,9 +16,8 @@ require 'Core/helpers.php';
 
 // Set configs
 $config = require 'config.php';
-
 define('CONFIG', $config);
 
 // Set Router
 Router::load('App/routes.php')
-    ->direct(Request::uri(), Request::method());
+    ->direct(Request::url(), Request::method());
