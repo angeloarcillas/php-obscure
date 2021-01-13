@@ -10,6 +10,11 @@ abstract class Models
     protected $fillable;
     protected $key;
 
+    public function query($sql, $params)
+    {
+        return $this->execute()->query($sql, $params);
+    }
+
     public function save(array $params): bool
     {
         $params = array_filter($params,

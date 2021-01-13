@@ -23,13 +23,14 @@ class UserController
         $request->status = 'pending';
         $request->role = 'applicant';
 
-        //     $param = [];
         // for ($i=0; $i < 50; $i++) {
-        //     $param[] = uniqid();
-        //     $param[] = uniqid() . '@mail.com';
-        //     $param[] = uniqid() . 'Foobar City';
+        //     $request->name = uniqid();
+        //     $request->email = uniqid() . '@mail.com';
+        //     $request->address = uniqid() . 'Foobar City';
+        //     $request->status = 'pending';
+        //     $request->role = 'applicant';
+
             $user->save($request->all());
-        //     $param = [];
         // }
     }
 }

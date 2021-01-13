@@ -34,9 +34,21 @@
               <div class="col-span-6 sm:col-span-3">
                 <label for="country" class="block text-sm font-medium text-gray-700">Course</label>
                 <select id="country" name="country" autocomplete="country" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                  <option>United States</option>
-                  <option>Canada</option>
-                  <option>Mexico</option>
+                  <?php foreach ($courses as $course): ?>
+                  <option><?php echo $course->name ?></option>
+                  <?php endforeach; ?>
+                </select>
+              </div>
+
+              <!-- Use ajax to specify major per course -->
+              <div class="col-span-6 sm:col-span-3">
+                <label for="country" class="block text-sm font-medium text-gray-700">Major</label>
+                <select id="country" name="country" autocomplete="country" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                  <option>mi arcu pretium nunc</option>
+                  <option>ultrices lorem et ligula lobortis</option>
+                  <option>erat nec consectetur</option>
+                  <option>massa convallis pretium portar</option>
+                  <option>sapien vehicular</option>
                 </select>
               </div>
 

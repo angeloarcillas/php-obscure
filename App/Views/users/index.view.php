@@ -40,16 +40,17 @@
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">BS Computer Science</div>
-                <div class="text-sm text-gray-500">Software Technology</div>
+                <!-- Implement sql join/ db relationship -->
+                <div class="text-sm text-gray-900"><?php echo $user->course_name ?></div>
+                <div class="text-sm text-gray-500"><?php echo $user->course_major ?></div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <span class="px-2 inline-flex text-xs leading-5 font-medium rounded-full bg-yellow-500 text-gray-800">
-                  Pending
+                  <?php echo $user->status ?>
                 </span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                Applicant
+                <?php echo $user->role?>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <a href="#" class="text-indigo-600 hover:text-indigo-900">Edit</a>
