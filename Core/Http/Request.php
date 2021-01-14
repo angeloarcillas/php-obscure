@@ -69,7 +69,7 @@ class Request
 
     public function __get($key)
     {
-        if (!$this->attributes[$key]) {
+        if (!isset($this->attributes[$key])) {
             return null;
         }
 

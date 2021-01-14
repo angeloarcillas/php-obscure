@@ -58,7 +58,7 @@
                                 <a href="#"
                                     class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Calendar</a>
 
-                                <a href="#"
+                                <a href="/php-obscure/int/1/str/foo"
                                     class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Reports</a>
                             </div>
                         </div>

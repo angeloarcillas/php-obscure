@@ -3,15 +3,15 @@
 /**
  * Require a view.
  *
- * @param  string $name
+ * @param  string $path
  * @param  array  $data
  */
 if (!function_exists("view")) {
-    function view(string $name, array $data = [])
+    function view(string $path, array $data = [])
     {
         extract($data); // array to variable
 
-        return require "App/Views/{$name}.view.php";
+        return require 'App/Views/' . str_replace('.', '/', e($path)) . '.view.php';
     }
 }
 
@@ -41,7 +41,11 @@ if (!function_exists('redirect')) {
         }
 
         // redirect
-        header('location:/' . trim($to, "/"), true, $status);
+        header('location:/' .
+            trim(str_replace('.', '/', e($to)), '/'),
+            true,
+            $status);
+
         exit;
     }
 }
@@ -127,26 +131,37 @@ if (!function_exists("dd")) {
  *
  * @return mixed
  */
-function session(string | array | object $x, bool $delete = false)
-{
+if (!function_exists('session')) {
 
-    // session($key, true) | delete session
-    if ($delete) {
-        unset($_SESSION[$x]);
-        return;
-    }
-    // session([$key => $value]) | set session
-    if (is_array($x)) {
-        $key = array_keys($x)[0];
-        $_SESSION[$key] = $x[$key];
-        return;
-    }
+    function session(string | array | object $x, bool $delete = false)
+    {
 
-    // if key doesnt exist
-    if (!isset($_SESSION[$x])) {
-        return false;
-    }
+        // session($key, true) | delete session
+        if ($delete) {
+            unset($_SESSION[$x]);
+            return;
+        }
+        // session([$key => $value]) | set session
+        if (is_array($x)) {
+            $key = array_keys($x)[0];
+            $_SESSION[$key] = $x[$key];
+            return;
+        }
 
-    // session($key) | get session
-    return $_SESSION[$x];
+        // if key doesnt exist
+        if (!isset($_SESSION[$x])) {
+            return false;
+        }
+
+        // session($key) | get session
+        return $_SESSION[$x];
+    }
+}
+
+if (!function_exists('render')) {
+    function render(string $path, array $data = [])
+    {
+        extract($data);
+        return require_once 'App/Views/' . str_replace('.', '/', $path) . '.view.php';
+    }
 }

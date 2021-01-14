@@ -12,19 +12,25 @@ namespace Core\Http\Traits;
  */
 trait Validator
 {
+
+    protected $input;
+
     public function validate(array $data)
     {
         foreach ($data as $field => $rules) {
+
+            $this->input = $field;
             $field = request($field);
             $total_rules = count($rules);
-
             for ($i = 0; $i < $total_rules; $i++) {
                 if (!str_contains($rules[$i], ':')) {
                     $rules[$i] = "{$rules[$i]}:";
                 }
 
                 [$rule, $parameter] = explode(':', $rules[$i]);
-                $this->$rule($field, $parameter);
+                if (!$this->$rule($field, $parameter)) {
+
+                }
             }
         }
 
@@ -33,22 +39,22 @@ trait Validator
 
     protected function required($request)
     {
-        if (!isset($request)) {
-            error("{$request} is required.");
+        if (empty($request)) {
+            error("{$this->input} is required.");
         }
     }
 
     protected function min($request, $value)
     {
         if (strlen($request) < $value) {
-            error("{$request} is too short.");
+            error("{$this->input} is too short.");
         }
     }
 
     protected function max($request, $value)
     {
         if (strlen($request) > $value) {
-            error("{$request} is too long.");
+            error("{$this->input} is too long.");
         }
     }
 
@@ -56,7 +62,7 @@ trait Validator
     {
         if (!filter_var($request, FILTER_VALIDATE_EMAIL)
             || !preg_match('/^[a-zA-Z0-9@.]*$/', $request)) {
-            error("invalid email");
+            error("invalid email format");
         }
     }
 }

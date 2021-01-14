@@ -6,13 +6,19 @@ use Exception;
 class Router
 {
     private $host = "php-obscure"; // (OPTIONAL)
-    private $controllerNamespace = "App\\Controllers\\";
-    private $validMethods = ['GET', 'POST'];
-    private $routes = [
+    protected $controllerNamespace = "App\\Controllers\\";
+    protected $validMethods = ['GET', 'POST'];
+    protected $routes = [
         'GET' => [],
         'POST' => [],
     ];
-    private $params = null;
+    protected $params = [];
+
+    protected $patterns = [
+        ':int' => '([0-9]+)',
+        ':str' => '([a-zA-Z]+)',
+        ':any' => '(.*)',
+    ];
 
     /**
      * Start buffer
@@ -87,24 +93,16 @@ class Router
         foreach ($this->routes[$method] as $route => $controller) {
 
             // check for wildcards
-            if (strpos($route, '{')) {
+            if (str_contains($route, ':')) {
 
-                // set pattern for wildcards
-                $pattern = preg_replace('/{([\w]+)}/', '(\w+)', $route);
+                $searches = array_keys($this->patterns);
+                $replaces = array_values($this->patterns);
+                $regex = '#^' . str_replace($searches, $replaces, $route) . '$#';
 
-                // match route
-                if (preg_match('/^' . str_replace('/', '\/', $pattern) . '$/', $uri, $values)) {
-                    // get all route wildcards
-                    preg_match_all('/{(\w+)}/', $route, $keys);
-                    // set parameter keys
-                    $key = array_pop($keys);
-                    // set parameter keys value
-                    $value = array_splice($values, 1);
-                    // set parameters
-                    $this->params = array_combine($key, $value);
+                if (preg_match($regex, $uri, $values)) {
+                    $this->params = array_slice($values, 1);
                 } else {
-                    // continue if route with wildcard and URI didnt match
-                    continue;
+                    continue; // next loop
                 }
             } else {
                 // continue if route and URI didnt match
@@ -115,7 +113,7 @@ class Router
 
             // call function if controller is callable
             if (is_callable($controller)) {
-                $controller($this->params);
+                $controller(...$this->params);
                 exit;
             }
 
@@ -125,7 +123,9 @@ class Router
             );
         }
 
-        throw new Exception("No routes defined for this url");
+        return redirect("$this->host/404");
+
+        // throw new Exception("No routes defined for this url");
     }
 
     /**
@@ -144,7 +144,7 @@ class Router
      * @param string $controller
      * @param string $action
      */
-    protected function callAction(string $controller, string $action)
+    protected function callAction(string $controller, string $action, array $params = [])
     {
         // set class namspace
         $class = $this->controllerNamespace . $controller;
@@ -155,7 +155,7 @@ class Router
         }
 
         // create object
-        $object = new $class;
+        $object = new $class();
 
         // check if method exist
         if (!method_exists($object, $action)) {
@@ -163,7 +163,7 @@ class Router
         }
 
         // call method from class
-        return $object->$action($this->params);
+        return $object->$action(...$this->params);
     }
 
     // redirect()->back();

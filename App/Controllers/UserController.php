@@ -8,29 +8,22 @@ class UserController
 {
     public function store()
     {
-
         $request = request();
+
+        if (! hash_equals(session('csrf_token'), $request->_csrf)) {
+            session(['error' => 'csrf token didnt match.']);
+            return redirect()->back();
+        }
+
         $request->validate([
-            'email_address' => ['required', 'email', 'min:3']
+            'email' => ['required', 'email', 'min:10'],
         ]);
 
-        $user = new User();
-
-        // change form input names and remove this
         $request->name = "{$request->first_name} {$request->last_name}";
-        $request->email = $request->email_address;
-        $request->address = $request->street_address;
-        $request->status = 'pending';
-        $request->role = 'applicant';
 
-        // for ($i=0; $i < 50; $i++) {
-        //     $request->name = uniqid();
-        //     $request->email = uniqid() . '@mail.com';
-        //     $request->address = uniqid() . 'Foobar City';
-        //     $request->status = 'pending';
-        //     $request->role = 'applicant';
+        $user = new User();
+        $user->save($request->all());
 
-            $user->save($request->all());
-        // }
+        return redirect('php-obscure.users');
     }
 }
