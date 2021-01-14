@@ -151,7 +151,7 @@ class Router
 
         // check if class exist
         if (!class_exists($class)) {
-            throw new Exception("No Class defined for this Controller.");
+            throw new Exception("Controller: \"{$class}\" doesn't exists.");
         }
 
         // create object
@@ -159,7 +159,7 @@ class Router
 
         // check if method exist
         if (!method_exists($object, $action)) {
-            throw new Exception("No Method defined for this Class.");
+            throw new Exception("Method: \"{$action}\" is not defined on {$class}.");
         }
 
         // call method from class

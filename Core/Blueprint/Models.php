@@ -8,14 +8,14 @@ abstract class Models
 {
     protected $table;
     protected $fillable;
-    protected $key;
+    protected $key = 'id';
 
     public function query($sql, $params)
     {
         return $this->execute()->query($sql, $params);
     }
 
-    public function save(array $params): bool
+    public function create(array $params): bool
     {
         $params = array_filter($params,
             fn($value, $key) => in_array($key, $this->fillable)
@@ -36,23 +36,21 @@ abstract class Models
         $params = array_filter($params,
             fn($value, $key) => in_array($key, $this->fillable)
             , ARRAY_FILTER_USE_BOTH);
-
-        array_push($params, $id);
-
         $set = trim(implode('=?,', array_keys($params)) . '=?', ',');
         $sql = sprintf('UPDATE %s SET %s WHERE %s = ?',
             $this->table, $set, $this->key);
 
+        $params[$this->key] = $id;
         return $this->execute()->query($sql, array_values($params));
     }
 
-    public function delete($params, $key = null)
+    public function delete($id, $key = null)
     {
         $this->key = $key ?? $this->key;
         $sql = sprintf('DELETE FROM %s WHERE %s = ?',
             $this->table, $this->key);
 
-        return $this->execute()->query($sql, $params);
+        return $this->execute()->query($sql, [$id]);
     }
 
     public function find(string $param, $key = null): bool | object

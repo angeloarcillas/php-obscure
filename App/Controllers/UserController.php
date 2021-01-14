@@ -17,6 +17,7 @@ class UserController
 
         $request->validate([
             'email' => ['required', 'email', 'min:10'],
+            'address' => ['required', 'min:10'],
         ]);
 
         $request->name = "{$request->first_name} {$request->last_name}";
@@ -25,5 +26,20 @@ class UserController
         $user->save($request->all());
 
         return redirect('php-obscure.users');
+    }
+
+    public function update()
+    {
+        // $attributes = [
+        //     'name' => 'foo',
+        //     'email' => 'bar@mail.com',
+        //     'role' => 'zxc',
+        //     'status' => 'opsec'
+        // ];
+        // $id = 1;
+
+        $user = new User();
+        // $user->update($id, $attributes);
+        $user->delete(1);
     }
 }
