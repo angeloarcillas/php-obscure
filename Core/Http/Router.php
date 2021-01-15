@@ -7,10 +7,11 @@ class Router
 {
     private $host = "php-obscure"; // (OPTIONAL)
     protected $controllerNamespace = "App\\Controllers\\";
-    protected $validMethods = ['GET', 'POST'];
+    protected $validMethods = ['GET', 'POST', 'PUT', 'DELETE'];
     protected $routes = [
         'GET' => [],
         'POST' => [],
+        'PUT' => [],
     ];
     protected $params = [];
 
@@ -77,6 +78,30 @@ class Router
     }
 
     /**
+     * Set PUT/PATCH routes
+     *
+     * @param string $uri
+     * @param string $controller
+     */
+    protected function put(string $uri, $controller)
+    {
+        $uri = trim($this->host . $uri, '/');
+        $this->routes['PUT'][$uri] = $controller;
+    }
+
+    /**
+     * Set DELETE routes
+     *
+     * @param string $uri
+     * @param string $controller
+     */
+    protected function delete(string $uri, $controller)
+    {
+        $uri = trim($this->host . $uri, '/');
+        $this->routes['DELETE'][$uri] = $controller;
+    }
+
+    /**
      * process route
      *
      * @param string $uri
@@ -84,6 +109,8 @@ class Router
      */
     public function direct(string $uri, string $method)
     {
+        $method = $_POST['_method'] ?? $method;
+        // dd($method);
         // validate request method
         if (!$this->isValidMethod(strtoupper($method))) {
             throw new Exception("Invalid request method");

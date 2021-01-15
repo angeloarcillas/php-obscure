@@ -58,13 +58,14 @@ if (!function_exists('redirect')) {
 if (!function_exists("request")) {
     function request(?string $key = null)
     {
-        // retrieve $_REQUEST
-        $request = (new \Core\Http\Request())->request();
+        // create request instance
+        $request = new \Core\Http\Request();
+
         if (!$key) {
             return $request;
         }
-        // return Request instance
 
+        // return request $attribute[$key]
         return $request->$key;
     }
 }
@@ -91,6 +92,19 @@ if (!function_exists('csrf_field')) {
     function csrf_field()
     {
         return '<input type="hidden" name="_csrf" value="' . csrf_token() . '">';
+    }
+}
+
+/**
+ * Create method field
+ *
+ * @return string
+ */
+
+if (!function_exists('method_field')) {
+    function method_field(string $method)
+    {
+        return '<input type="hidden" name="_method" value="' . $method . '">';
     }
 }
 

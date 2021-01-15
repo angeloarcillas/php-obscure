@@ -13,7 +13,7 @@
             </div>
         </div>
         <div class="mt-5 md:mt-0 md:col-span-2">
-            <form action="/php-obscure/register"
+            <form action="/php-obscure/users"
                 method="POST">
                 <?php echo csrf_field() ?>
                 <div

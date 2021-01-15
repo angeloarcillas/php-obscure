@@ -6,6 +6,14 @@ use App\Models\User;
 
 class UserController
 {
+     public function index()
+    {
+        $user = new User();
+        return view('users/index', [
+            'users' => $user->all()
+        ]);
+    }
+
     public function store()
     {
         $request = request();
@@ -23,13 +31,14 @@ class UserController
         $request->name = "{$request->first_name} {$request->last_name}";
 
         $user = new User();
-        $user->save($request->all());
+        $user->create($request->all());
 
         return redirect('php-obscure.users');
     }
 
-    public function update()
+    public function update($id)
     {
+        dd('update');
         // $attributes = [
         //     'name' => 'foo',
         //     'email' => 'bar@mail.com',
@@ -41,5 +50,10 @@ class UserController
         $user = new User();
         // $user->update($id, $attributes);
         $user->delete(1);
+    }
+
+    public function delete($id)
+    {
+        dd('delete');
     }
 }

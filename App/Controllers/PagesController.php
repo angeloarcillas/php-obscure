@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-use App\Models\User;
+;
 use App\Models\Course;
 
 class PagesController
@@ -12,14 +12,6 @@ class PagesController
         $course = new Course();
         return view('welcome', [
             'courses' => $course->all()
-        ]);
-    }
-
-    public function users()
-    {
-        $user = new User();
-        return view('users/index', [
-            'users' => $user->all()
         ]);
     }
 }

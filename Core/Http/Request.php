@@ -37,10 +37,10 @@ class Request
     /**
      * @return string Request variables
      */
-    public function request(): object
+    public function request(): ?object
     {
         if (empty($_REQUEST)) {
-            throw new Exception("Error: Empty request");
+            throw new \Exception("Error: Empty request");
         }
 
         return $this;
