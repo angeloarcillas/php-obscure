@@ -45,7 +45,7 @@
                 <div class="text-sm text-gray-500"><?php echo $user->course_major ?></div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <span class="px-2 inline-flex text-xs leading-5 font-medium rounded-full bg-yellow-500 text-gray-800">
+                <span class="px-2 inline-flex text-xs leading-5 font-medium rounded-full text-gray-800">
                   <?php echo $user->status ?>
                 </span>
               </td>
@@ -53,13 +53,8 @@
                 <?php echo $user->role?>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-              <form action="/php-obscure/users/<?php echo $user->id; ?>"
-                id="js-edit" method="POST"
-                class="hidden">
-                <?php echo method_field('DELETE'); ?>
-              </form>
-                <a href="#a"
-                  onclick="document.querySelector('#js-edit').submit()"
+
+                <a href="/php-obscure/users/<?php echo $user->id ?>/edit"
                  class="text-indigo-600 hover:text-indigo-900">Edit</a>
               </td>
             </tr>

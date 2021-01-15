@@ -29,31 +29,40 @@ class UserController
         ]);
 
         $request->name = "{$request->first_name} {$request->last_name}";
-
+            // dd($request->all());
         $user = new User();
         $user->create($request->all());
 
         return redirect('php-obscure.users');
     }
 
+    public function edit($id)
+    {
+        return view('users.edit', [
+            'user' => (new User())->find($id),
+            'courses' => (new \App\Models\Course())->all()
+        ]);
+    }
+
     public function update($id)
     {
-        dd('update');
-        // $attributes = [
-        //     'name' => 'foo',
-        //     'email' => 'bar@mail.com',
-        //     'role' => 'zxc',
-        //     'status' => 'opsec'
-        // ];
-        // $id = 1;
+        $request = request();
+
+        verifyCsrf($request->_csrf);
 
         $user = new User();
-        // $user->update($id, $attributes);
-        $user->delete(1);
+        $user->update($id, $request->all());
+
+        return redirect("/php-obscure/users");
     }
 
     public function delete($id)
     {
-        dd('delete');
+        $request = request();
+
+        verifyCsrf($request->_csrf);
+
+        (new User())->delete($id);
+        return redirect('php-obscure/users');
     }
 }

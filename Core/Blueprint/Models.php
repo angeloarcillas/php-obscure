@@ -53,7 +53,7 @@ abstract class Models
         return $this->execute()->query($sql, [$id]);
     }
 
-    public function find(string $param, $key = null): bool | object
+    public function find(string $param, $key = null): bool|object
     {
         $this->key = $key ?? $this->key;
         $sql = sprintf('SELECT * FROM %s WHERE %s = ?',

@@ -76,8 +76,12 @@ if (!function_exists("request")) {
 if (!function_exists('csrf_token')) {
     function csrf_token()
     {
-        $_SESSION["csrf_token"] = bin2hex(random_bytes(32));
-        $_SESSION["csrf_lifespan"] = time() + 3600;
+        if (!isset($_SESSION['csrf_token'])) {
+            $_SESSION["csrf_token"] = bin2hex(random_bytes(32));
+            $_SESSION["csrf_lifespan"] = time() + 3600;
+            return $_SESSION["csrf_token"];
+        }
+
         return $_SESSION["csrf_token"];
     }
 }
@@ -177,5 +181,21 @@ if (!function_exists('render')) {
     {
         extract($data);
         return require_once 'App/Views/' . str_replace('.', '/', $path) . '.view.php';
+    }
+}
+
+if (!function_exists('verifyCsrf')) {
+    function verifyCsrf(string $hash)
+    {
+        if ($_SESSION['csrf_lifespan'] < time()
+                || !hash_equals(session('csrf_token'), $hash)
+            ) {
+            session(['error' => 'csrf token didnt match.']);
+            return redirect()->back();
+        };
+
+        unset($_SESSION['csrf_token']);
+        unset($_SESSION['csrf_lifespan']);
+        return;
     }
 }

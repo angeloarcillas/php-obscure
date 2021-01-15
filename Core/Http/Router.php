@@ -111,6 +111,7 @@ class Router
     {
         $method = $_POST['_method'] ?? $method;
         // dd($method);
+
         // validate request method
         if (!$this->isValidMethod(strtoupper($method))) {
             throw new Exception("Invalid request method");
