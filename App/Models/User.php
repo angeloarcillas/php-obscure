@@ -13,6 +13,4 @@ class User extends Models
         'role', 'course_name',
         'course_major'
     ];
-
-
 }

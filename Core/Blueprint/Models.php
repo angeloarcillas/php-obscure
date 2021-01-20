@@ -6,69 +6,137 @@ use Core\Database\QueryBuilder;
 
 abstract class Models
 {
+    // set sql table
     protected $table;
+
+    // set valid columns
     protected $fillable;
+
+    // set where key
     protected $key = 'id';
 
-    public function query($sql, $params)
+    /**
+     * Raw sql
+     */
+    public function rawQuery(string $sql, array $params = []): bool
     {
-        return $this->execute()->query($sql, $params);
+        // execute raw sql
+        return $this->builder()->rawQuery($sql, $params);
     }
 
+    /**
+     * Raw select sql
+     *
+     * return 1 data
+     */
+    public function rawSelectQuery(string $sql, array $params = []): bool|object
+    {
+        // execute raw select sql
+        return $this->builder()->rawSelect($sql, $params);
+    }
+
+    /**
+     * Raw select all query
+     *
+     * return all
+     */
+    public function rawSelectAllQuery(string $sql, array $params = []): array
+    {
+        // execute raw select all sql
+        return $this->builder()->rawSelectAll($sql, $params);
+    }
+
+    /**
+     * Query for INSERT sql
+     */
     public function create(array $params): bool
     {
-        $params = array_filter($params,
-            fn($value, $key) => in_array($key, $this->fillable)
-            , ARRAY_FILTER_USE_BOTH);
+        // filter request with $fillable
+        $params = $this->filter($params);
 
-        $columns = implode(',', array_keys($params));
-        $values = trim(str_repeat('?,', count($params)), ',');
-        $sql = sprintf('INSERT INTO %s (%s) VALUES (%s)',
-            $this->table, $columns, $values);
-
-        return $this->execute()->query($sql, array_values($params));
+        // execute insert sql
+        return $this->builder()->insert($this->table, $params);
     }
 
-    public function update($id, $params, $key = null)
+    /**
+     * Query for UPDATE sql
+     */
+    public function update($id, $params, $key = null): bool
     {
-        $this->key = $key ?? $this->key;
+        // check if user defined a key
+        $key = $key ? [$key => $id] : [$this->key => $id];
 
-        $params = array_filter($params,
-            fn($value, $key) => in_array($key, $this->fillable)
-            , ARRAY_FILTER_USE_BOTH);
-        $set = trim(implode('=?,', array_keys($params)) . '=?', ',');
-        $sql = sprintf('UPDATE %s SET %s WHERE %s = ?',
-            $this->table, $set, $this->key);
+        // filter request with $fillable
+        $params = $this->filter($params);
 
-        $params[$this->key] = $id;
-        return $this->execute()->query($sql, array_values($params));
+        // execute update sql
+        return $this->builder()->update($this->table, $key, $params);
     }
 
-    public function delete($id, $key = null)
+    /**
+     * Query for DELETE sql
+     */
+    public function delete($id, $key = null): bool
     {
-        $this->key = $key ?? $this->key;
-        $sql = sprintf('DELETE FROM %s WHERE %s = ?',
-            $this->table, $this->key);
+        // check if user defined a key
+        $key = $key ?? $this->key;
 
-        return $this->execute()->query($sql, [$id]);
+        // run delete sql
+        return $this->builder()->delete($this->table, $key, $id);
     }
 
-    public function find(string $param, $key = null): bool|object
-    {
-        $this->key = $key ?? $this->key;
-        $sql = sprintf('SELECT * FROM %s WHERE %s = ?',
-            $this->table, $this->key);
-        return $this->execute()->select($sql, [$param]);
+    /**
+     * Return specific data from table
+     */
+    public function find(
+        string $param,
+        ?string $key = null,
+        ?string $table = null
+    ): bool|object {
+        // check if user defined a table
+        $table = $table ?? $this->table;
+
+        // check if user defined a key
+        $key = $key ?? $this->key;
+
+        // execute select sql
+        return $this->builder()->select($table, $key, $param);
     }
 
-    public function all(array $params = []): array
+    /**
+     * Return all data from table
+     */
+    public function all(?string $table = null): array
     {
-        $sql = sprintf('SELECT * FROM %s', $this->table);
-        return $this->execute()->selectAll($sql, $params);
+        // check if user defined a table
+        $this->table = $table ?? $this->table;
+
+        // execute select all sql
+        return $this->builder()->selectAll($this->table);
     }
 
-    private function execute()
+    /**
+     * Filter $request with $this->fillable
+     *
+     * Return all request that can be filled
+     */
+    protected function filter($params): array
     {
-        return new QueryBuilder();
+        return array_filter(
+            // request
+            $params,
+
+            // arrow function | return fillable requests
+            fn ($x, $key) => in_array($key, $this->fillable),
+
+            // use array keys & values
+            ARRAY_FILTER_USE_BOTH
+        );
+    }
+
+    // create Querybuilderer instance
+    private function builder()
+    {
+        return new Querybuilder();
     }
 }
