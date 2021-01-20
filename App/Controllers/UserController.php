@@ -9,6 +9,8 @@ class UserController
      public function index()
     {
         $user = new User();
+        dd($user->all());
+
         return view('users/index', [
             'users' => $user->all()
         ]);
@@ -18,10 +20,7 @@ class UserController
     {
         $request = request();
 
-        if (! hash_equals(session('csrf_token'), $request->_csrf)) {
-            session(['error' => 'csrf token didnt match.']);
-            return redirect()->back();
-        }
+        verifyCsrf($request->_csrf);
 
         $request->validate([
             'email' => ['required', 'email', 'min:10'],
@@ -29,7 +28,6 @@ class UserController
         ]);
 
         $request->name = "{$request->first_name} {$request->last_name}";
-            // dd($request->all());
         $user = new User();
         $user->create($request->all());
 
