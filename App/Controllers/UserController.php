@@ -9,7 +9,7 @@ class UserController
      public function index()
     {
         $user = new User();
-        dd($user->all());
+        dd(array_filter(['a','c'], fn($a) => in_array($a, ['c'])));
 
         return view('users/index', [
             'users' => $user->all()
@@ -41,6 +41,7 @@ class UserController
             'courses' => (new \App\Models\Course())->all()
         ]);
     }
+
 
     public function update($id)
     {

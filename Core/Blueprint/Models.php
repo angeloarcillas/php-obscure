@@ -6,15 +6,21 @@ use Core\Database\QueryBuilder;
 
 abstract class Models
 {
+    // set sql table
     protected $table;
+
+    // set valid columns
     protected $fillable;
+
+    // set where key
     protected $key = 'id';
 
     /**
      * Raw sql
      */
-    public function rawQeury(string $sql, array $params = [])
+    public function rawQuery(string $sql, array $params = []): bool
     {
+        // execute raw sql
         return $this->builder()->rawQuery($sql, $params);
     }
 
@@ -23,8 +29,9 @@ abstract class Models
      *
      * return 1 data
      */
-    public function rawSelectQuery(string $sql, array $params)
+    public function rawSelectQuery(string $sql, array $params = []): bool|object
     {
+        // execute raw select sql
         return $this->builder()->rawSelect($sql, $params);
     }
 
@@ -33,8 +40,9 @@ abstract class Models
      *
      * return all
      */
-    public function rawSelectAllQuery(string $sql, array $params = [])
+    public function rawSelectAllQuery(string $sql, array $params = []): array
     {
+        // execute raw select all sql
         return $this->builder()->rawSelectAll($sql, $params);
     }
 
@@ -43,25 +51,32 @@ abstract class Models
      */
     public function create(array $params): bool
     {
+        // filter request with $fillable
         $params = $this->filter($params);
+
+        // execute insert sql
         return $this->builder()->insert($this->table, $params);
     }
 
     /**
      * Query for UPDATE sql
      */
-    public function update($id, $params, $key = null)
+    public function update($id, $params, $key = null): bool
     {
+        // check if user defined a key
         $key = $key ? [$key => $id] : [$this->key => $id];
+
+        // filter request with $fillable
         $params = $this->filter($params);
 
+        // execute update sql
         return $this->builder()->update($this->table, $key, $params);
     }
 
     /**
      * Query for DELETE sql
      */
-    public function delete($id, $key = null)
+    public function delete($id, $key = null): bool
     {
         // check if user defined a key
         $key = $key ?? $this->key;
@@ -84,7 +99,7 @@ abstract class Models
         // check if user defined a key
         $key = $key ?? $this->key;
 
-        // run select sql
+        // execute select sql
         return $this->builder()->select($table, $key, $param);
     }
 
@@ -96,7 +111,7 @@ abstract class Models
         // check if user defined a table
         $this->table = $table ?? $this->table;
 
-        // run select all sql
+        // execute select all sql
         return $this->builder()->selectAll($this->table);
     }
 
@@ -105,7 +120,7 @@ abstract class Models
      *
      * Return all request that can be filled
      */
-    protected function filter($params)
+    protected function filter($params): array
     {
         return array_filter(
             // request
