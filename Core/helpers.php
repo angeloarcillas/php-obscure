@@ -9,14 +9,24 @@
 if (!function_exists("view")) {
     function view(string $path, array $data = [])
     {
-        extract($data); // array to variable
+        // convert array to variable
+        extract($data);
 
-        return require 'App/Views/' . str_replace('.', '/', e($path)) . '.view.php';
+        // convert users.create to users/create
+        $realSubPath = str_replace('.', '/', e($path));
+
+        // path of file to rquire
+        $realPath = "App/Views/{$realSubPath}.view.php";
+
+        // require file
+        return require_once $realPath;
     }
 }
 
 /**
  * Return file from assets folder
+ *
+ * @param string $path
  */
 if (!function_exists("assets")) {
     function assets(string $path)
@@ -27,46 +37,56 @@ if (!function_exists("assets")) {
 
 /**
  * Redirect to new Page
+ *
+ * @param null|string $path
+ * @param int $status
+ * @param array $headers
  */
 if (!function_exists('redirect')) {
-    function redirect(?string $to = null, int $status = 302, array $headers = [])
-    {
-        if (!$to) {
+    function redirect(
+        ?string $path = null, // path to redirect
+        int $status = 302, // http status code
+        array $headers = [] // additional request headers
+    ) {
+        // check if no $path
+        if (!$path) {
+            // return Router class
             return new \Core\Http\Router();
         }
 
-        // loop headers
-        foreach ($headers as $header) {
-            header($header);
+        // check if headers already sent
+        if (headers_sent() === false) {
+            // loop headers
+            foreach ($headers as $header) header($header);
+
+            // convert user.settings to user/settings
+            $realSubPath = str_replace('.', '/', e($path));
+            // trim excess forward slash
+            $realPath = '/' . trim($realSubPath, '/');
+            // redirect
+            header("location:{$realPath}", true, $status);
+            exit;
         }
 
-        // redirect
-        header('location:/' .
-            trim(str_replace('.', '/', e($to)), '/'),
-            true,
-            $status);
-
-        exit;
+        return false;
     }
 }
 
 /**
  * Get all request
  *
+ * @param null|string $key
+ *
  * @return array|string
  */
 if (!function_exists("request")) {
     function request(?string $key = null)
     {
-        // create request instance
+        // create Request instance
         $request = new \Core\Http\Request();
 
-        if (!$key) {
-            return $request;
-        }
-
-        // return request $attribute[$key]
-        return $request->$key;
+        // return request or request class
+        return $key ?  $request->$key : $request;
     }
 }
 
@@ -76,12 +96,15 @@ if (!function_exists("request")) {
 if (!function_exists('csrf_token')) {
     function csrf_token()
     {
+        // check if token already set
         if (!isset($_SESSION['csrf_token'])) {
-            $_SESSION["csrf_token"] = bin2hex(random_bytes(32));
-            $_SESSION["csrf_lifespan"] = time() + 3600;
+            $_SESSION["csrf_token"] = bin2hex(random_bytes(32)); // hash
+            $_SESSION["csrf_lifespan"] = time() + 3600; // +60 minutes
             return $_SESSION["csrf_token"];
         }
 
+        // return existing token
+        // usable for one or more csrf field
         return $_SESSION["csrf_token"];
     }
 }
@@ -95,7 +118,11 @@ if (!function_exists('csrf_token')) {
 if (!function_exists('csrf_field')) {
     function csrf_field()
     {
-        return '<input type="hidden" name="_csrf" value="' . csrf_token() . '">';
+        return '<input
+            type="hidden"
+            name="_csrf"
+            value="'. csrf_token() .'"
+        >';
     }
 }
 
@@ -108,12 +135,18 @@ if (!function_exists('csrf_field')) {
 if (!function_exists('method_field')) {
     function method_field(string $method)
     {
-        return '<input type="hidden" name="_method" value="' . $method . '">';
+        return '<input
+            type="hidden"
+            name="_method"
+            value="'. e($method) .'"
+        >';
     }
 }
 
 /**
  * Encode string
+ *
+ * @param string $string
  */
 if (!function_exists("e")) {
     function e(string $string)
@@ -151,51 +184,78 @@ if (!function_exists("dd")) {
  */
 if (!function_exists('session')) {
 
-    function session(string | array | object $x, bool $delete = false)
+    function session(string|array $property, bool $delete = false)
     {
-
-        // session($key, true) | delete session
-        if ($delete) {
-            unset($_SESSION[$x]);
-            return;
-        }
-        // session([$key => $value]) | set session
-        if (is_array($x)) {
-            $key = array_keys($x)[0];
-            $_SESSION[$key] = $x[$key];
-            return;
+        // delete session
+        if ($delete && is_string($property)) {
+            unset($_SESSION[$property]);
+            return true;
         }
 
-        // if key doesnt exist
-        if (!isset($_SESSION[$x])) {
+        // set session
+        if (is_array($property)) {
+            // set session key
+            $key = array_keys($property)[0];
+            // set session value
+            $_SESSION[$key] = $property[$key];
+            return true;
+        }
+
+        // if key doesnt exists
+        if (!isset($_SESSION[$property])) {
+            $_SESSION['errors'] = "{$property} doesn't exists.";
             return false;
         }
 
-        // session($key) | get session
-        return $_SESSION[$x];
+        // get session
+        return $_SESSION[$property];
     }
 }
 
+/**
+ * Include component
+ */
 if (!function_exists('render')) {
     function render(string $path, array $data = [])
     {
+        // convert array to variable
         extract($data);
-        return require_once 'App/Views/' . str_replace('.', '/', $path) . '.view.php';
+
+        // convert users.create to users/create
+        $realSubPath = str_replace('.', '/', $path);
+        // path of file to require
+        $realPath = "App/Views/{$realSubPath}.view.php";
+        // require file
+        return require_once $realPath;
     }
 }
+
+/**
+ * Verify CSRF token
+ */
 
 if (!function_exists('verifyCsrf')) {
     function verifyCsrf(string $hash)
     {
-        if ($_SESSION['csrf_lifespan'] < time()
-                || !hash_equals(session('csrf_token'), $hash)
-            ) {
-            session(['error' => 'csrf token didnt match.']);
+        // check if csrf token exists
+        if (!isset($_SESSION['csrf_token'])) return false;
+
+        // check if csrf token exired
+        $expired = $_SESSION['csrf_lifespan'] < time();
+
+        // compare csrf token and csrf field
+        $matched = hash_equals($_SESSION['csrf_token'],  $hash);
+
+        if ($expired || !$matched) {
+            $_SESSI['error'] = 'csrf token didnt match.';
             return redirect()->back();
         };
 
+        // remove csrf sessions
         unset($_SESSION['csrf_token']);
         unset($_SESSION['csrf_lifespan']);
-        return;
+
+        // csrf token and csrf field matched
+        return true;
     }
 }

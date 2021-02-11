@@ -9,17 +9,19 @@ namespace Core\Http\Traits;
  * 1. use SESSION not error()
  * 2. improve variable/function names
  * 3. refactor
+ * 4. Add more
  */
 trait Validator
 {
 
     protected $input;
 
-    public function validate(array $data)
+    public function validate(array $fields)
     {
-        $return = [];
-        foreach ($data as $key => $rules) {
-            $this->input = $key;
+        $return = []; // return data placeholder
+
+        foreach ($fields as $key => $rules) {
+            $this->input = $key; // <input name="$input">
             $value = request($key);
             $total_rules = count($rules);
 
@@ -30,7 +32,6 @@ trait Validator
 
                 [$rule, $parameter] = explode(':', $rules[$i]);
                 if (!$this->$rule($value, $parameter)) {
-
                 }
             }
             array_push($return, [$key => request($key)]);
@@ -62,8 +63,10 @@ trait Validator
 
     protected function email($request)
     {
-        if (!filter_var($request, FILTER_VALIDATE_EMAIL)
-            || !preg_match('/^[a-zA-Z0-9@.]*$/', $request)) {
+        if (
+            !filter_var($request, FILTER_VALIDATE_EMAIL)
+            || !preg_match('/^[a-zA-Z0-9@.]*$/', $request)
+        ) {
             error("invalid email format");
         }
     }
