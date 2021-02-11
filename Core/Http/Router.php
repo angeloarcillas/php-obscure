@@ -146,9 +146,7 @@ class Router
             }
 
             // call controller
-            return $this->callAction(
-                ...explode('@', $controller)
-            );
+            return $this->callAction($controller);
         }
 
         return redirect("$this->host/404");
@@ -172,8 +170,10 @@ class Router
      * @param string $controller
      * @param string $action
      */
-    protected function callAction(string $controller, string $action, array $params = [])
+    protected function callAction(string $controller)
     {
+        // set controller and action
+        [$controller, $action ] = [...explode('@',$controller), null];
         // set class namspace
         $class = $this->controllerNamespace . $controller;
 
@@ -185,9 +185,13 @@ class Router
         // create object
         $object = new $class();
 
+        // call class _invoke()
+        if (!$action && is_callable($object)) return $object();
+
         // check if method exist
         if (!method_exists($object, $action)) {
-            throw new Exception("Method: \"{$action}\" is not defined on {$class}.");
+            $action = $action ?? '__invoke';
+            throw new Exception("Method: \"{$action}()\" is not defined on {$class}.");
         }
 
         // call method from class

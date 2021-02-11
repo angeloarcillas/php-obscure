@@ -26,13 +26,10 @@ trait Validator
             $total_rules = count($rules);
 
             for ($i = 0; $i < $total_rules; $i++) {
-                if (!str_contains($rules[$i], ':')) {
-                    $rules[$i] = "{$rules[$i]}:";
-                }
-
-                [$rule, $parameter] = explode(':', $rules[$i]);
-                if (!$this->$rule($value, $parameter)) {
-                }
+                // set rule and parameter
+                [$rule, $parameter] = [...explode(':', $rules[$i], null)];
+                // validate rule
+                $this->$rule($value, $parameter);
             }
             array_push($return, [$key => request($key)]);
         }
